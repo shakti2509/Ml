@@ -56,7 +56,65 @@ gcv.fit(X, y)
 print(gcv.best_params_)
 print(gcv.best_score_)
 
+### Using Pipe with scaling
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+knn = KNeighborsRegressor()
+pipe = Pipeline([('STD',scaler),('KNN',knn)])
+kfold = KFold(n_splits=5, shuffle=True, random_state=2022)
+params = { 'KNN__n_neighbors': np.arange(1,16)}
+knn = KNeighborsRegressor()
+gcv = GridSearchCV(pipe, param_grid=params, scoring='r2',cv=kfold)
+gcv.fit(X, y)
+print(gcv.best_params_)
+print(gcv.best_score_)
 
+################# Medical Cost Expenses #######################
+import os
+from sklearn.linear_model import LinearRegression
+os.chdir(r"Z:\PML\Cases\Medical Cost Personal")
+insurance = pd.read_csv("insurance.csv")
+dum_ins = pd.get_dummies(insurance, drop_first=True)
+
+X = dum_ins.drop('charges', axis=1)
+y = dum_ins['charges']
+
+### Linear Regression
+kfold = KFold(n_splits=5, shuffle=True, random_state=2022)
+lr = LinearRegression()
+results = cross_val_score(lr, X, y, cv=kfold, scoring='r2')
+print(results.mean())
+
+### K-NN
+scaler = StandardScaler()
+knn = KNeighborsRegressor()
+pipe = Pipeline([('STD',scaler),('KNN',knn)])
+kfold = KFold(n_splits=5, shuffle=True, random_state=2022)
+params = { 'KNN__n_neighbors': np.arange(1,16)}
+knn = KNeighborsRegressor()
+gcv = GridSearchCV(pipe, param_grid=params, scoring='r2',cv=kfold)
+gcv.fit(X, y)
+print(gcv.best_params_)
+print(gcv.best_score_)
+
+### Predicting on unlabelled data
+knn = KNeighborsRegressor(n_neighbors=7)
+pipe = Pipeline([('STD',scaler),('KNN',knn)])
+pipe.fit(X,y)
+
+tst_insure = pd.read_csv("tst_insure.csv")
+dum_tst = pd.get_dummies(tst_insure, drop_first=True)
+print(X.dtypes)
+print(dum_tst.dtypes)
+predictions = pipe.predict(dum_tst)
+
+# or using Grid Search 
+pd_cv = pd.DataFrame(gcv.cv_results_)
+best_model = gcv.best_estimator_
+tst_insure = pd.read_csv("tst_insure.csv")
+dum_tst = pd.get_dummies(tst_insure, drop_first=True)
+predictions = best_model.predict(dum_tst)
 
 
 

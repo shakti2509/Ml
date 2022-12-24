@@ -109,4 +109,25 @@ best_k = Ks[i_max]
 print("Best n_neigbors =", best_k)
 print("Best Score =", acc[i_max])
 
+### with Pipeline
+from sklearn.pipeline import Pipeline
+scaler = StandardScaler()
+# Loop for R2
+acc = []
+Ks = np.arange(1,16)
+for i in Ks:
+    knn = KNeighborsRegressor(n_neighbors=i)
+    pipe = Pipeline([('STD',scaler),('KNN',knn)])
+    pipe.fit(X_train, y_train)
+    y_pred = pipe.predict(X_test)
+    acc.append(r2_score(y_test, y_pred))
+
+i_max = np.argmax(acc)
+best_k = Ks[i_max]
+print("Best n_neigbors =", best_k)
+print("Best Score =", acc[i_max])
+
+
+
+
 
